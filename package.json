@@ -14,6 +14,8 @@
     "dev": "nodemon",
     "playlist": "node ./bin/cli.js playlist",
     "playlist:debug": "tsc; node ./bin/cli.js playlist",
+    "playlist:debug:slim": "tsc; node ./bin/cli.js playlist -ht",
+    "playlist:debug:fast": "tsc; node ./bin/cli.js playlist -ht -v",
     "playlist:debug:verbose": "tsc; node ./bin/cli.js playlist -v",
     "local": "tsc; node ./bin/cli.js http://localhost:3000/graphql -v",
     "build-ts": "tsc",

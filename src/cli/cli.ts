@@ -20,6 +20,7 @@ async function main() {
       serverUrl = url;
     })
     .option('-v, --verbose', 'Displays all the query information')
+    .option('-ht, --hidetable', 'Removes table Display')
     // TODO: Add support back for running in some in parallel while preserving dependency ordering
     // .option('-p, --parallel', 'Executes all queries in parallel')
     // TODO: Add back support for retries
@@ -52,14 +53,18 @@ async function main() {
     }
   });
 
-  if (program.verbose) {
+  if (!program.hidetable) {
     term.bold('\n\nAPIs:\n');
     term.table(
       reportData.map((report) => [
         report.status === 'passed' && report.run.meetsSLA ? '^G√ ' : '',
         `${report.status === 'passed' && report.run.meetsSLA ? '' : '^R'}${
           report.query.signature || report.query.query
-        } ${report.errors.length ? '\n\n' + report.errors[0] + '\n' : ''}\n`,
+        } ${
+          report.status === 'passed' && !program.verbose
+            ? ''
+            : `${report.errors.length ? '\n\n' + report.errors[0] + '\n' : ''}`
+        }\n`,
         `${report.run.meetsSLA ? '^G' : '^R'}${report.run.ms}ms `,
       ]),
       {
@@ -77,15 +82,16 @@ async function main() {
   const failedTests = reportData.filter((report) => report.status === 'failed' || !report.run.meetsSLA);
   const passedTests = reportData.filter((report) => report.status === 'passed' && report.run.meetsSLA).length;
 
-  failedTests.length && term.bold.red('\nFailed Tests:\n\n');
+  failedTests.length && term.bold.red('\n\nFailed Tests:\n');
   failedTests.forEach((report) => {
     report.errors.forEach((err) => {
-      term.red(`${report.query.signature || report.query.query} \n`);
+      // term.red(`${report.query.signature || report.query.query} \n`);
+      term.red(`${program.verbose ? `${report.query.signature}\n${report.query.query}` : report.query.signature} \n`);
       term(`- ${err} \n\n`);
     });
   });
 
-  term.bold('\n\n\nResults:\n');
+  term.bold('\n\nResults:\n');
   term.green(`${passedTests} passing\n`);
   term.red(`${failedTests.length} failing\n\n`);
 
